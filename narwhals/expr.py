@@ -6725,6 +6725,7 @@ class When:
         return [extract_compliant(plx, v) for v in self._predicates]
 
     def then(self, value: Any) -> Then:
+        print("value", type(value), value)
         return Then(
             lambda plx: plx.when(*self._extract_predicates(plx)).then(
                 extract_compliant(plx, value)

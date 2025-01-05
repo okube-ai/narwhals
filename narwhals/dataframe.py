@@ -77,6 +77,13 @@ class BaseFrame(Generic[FrameT]):
         if isinstance(arg, Series):
             return arg._compliant_series
         if isinstance(arg, Expr):
+            print("EXPR=", Expr)
+            ns = self.__narwhals_namespace__()
+            print("namespace class", self.__narwhals_namespace__)
+            print("namespace", ns)
+
+            print("TO COMPLIANT EXPR", arg._to_compliant_expr)
+
             return arg._to_compliant_expr(self.__narwhals_namespace__())
         if get_polars() is not None and "polars" in str(type(arg)):
             msg = (
