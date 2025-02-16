@@ -78,6 +78,14 @@ def native_to_narwhals_dtype(
                 dtype.elementType, version=version, spark_types=spark_types
             )
         )
+    if isinstance(dtype, spark_types.StructType):
+        fields = {}
+        for f in dtype:
+            fields[f.name] = native_to_narwhals_dtype(
+                f.dataType, version=version, spark_types=spark_types
+            )
+        return dtypes.Struct(fields=fields)
+
     return dtypes.Unknown()
 
 
@@ -120,8 +128,19 @@ def narwhals_to_native_dtype(
         )
         return spark_types.ArrayType(elementType=inner)
     if isinstance_or_issubclass(dtype, dtypes.Struct):  # pragma: no cover
-        msg = "Converting to Struct dtype is not supported yet"
-        raise NotImplementedError(msg)
+        return spark_types.StructType(
+            fields=[
+                spark_types.StructField(
+                    name=field.name,
+                    dataType=narwhals_to_native_dtype(
+                        field.dtype,
+                        version=version,
+                        spark_types=spark_types,
+                    ),
+                )
+                for field in dtype.fields  # type: ignore[union-attr]
+            ]
+        )
     if isinstance_or_issubclass(dtype, dtypes.Array):  # pragma: no cover
         msg = "Converting to Array dtype is not supported yet"
         raise NotImplementedError(msg)
